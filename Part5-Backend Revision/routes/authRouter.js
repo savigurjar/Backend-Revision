@@ -3,7 +3,8 @@ const authRouter = express.Router();
 const User = require("../models/users");
 const validateUser = require("../utils/validate");
 const bcrypt = require("bcrypt");
-const jwt = require('jsonwebtoken')
+const jwt = require("jsonwebtoken");
+const redisClient = require("../config/redis");
 
 authRouter.post("/register", async (req, res) => {
   try {
@@ -18,25 +19,40 @@ authRouter.post("/register", async (req, res) => {
 
 authRouter.post("/login", async (req, res) => {
   try {
-    const { emailId, password } = req.body;
+    const people = await User.findOne({ emailId: req.body.emailId });
 
-    const people = await User.findOne({ emailId });
-    if (!people) throw new Error("invalid credentails");
+    const IsAllowed = people.getVerify(req.body.password);
+    if (!IsAllowed) {
+      throw new Error("Invalid credentials");
+    }
 
-    // password
-    const IsAllowed = await bcrypt.compare(password, people.password);
-    if (!IsAllowed) throw new Error("invalid credentials");
-
-    const token = await jwt.sign(
-      { _id: people._id, emailId: people.emailId },
-      process.env.SECRET_KEY,
-      { expiresIn: "1days" }
-    );
+    // jwt tokan - cookie ki help se bhejege
+    const token = people.getJwt();
     res.cookie("token", token);
+    // res.cookie("token", "hksihrighlshjghgfjkhgmkhgjkgg");
 
-    res.status(200).send("Login successful");
+    res.send("login successfully");
   } catch (err) {
-    res.status(403).send("Error " + err);
+    res.send("Error " + err.message);
+  }
+});
+
+authRouter.post("/logout", async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(400).send("no token found");
+    }
+    await redisClient.set(`token:${token}`, "Bloacked");
+    const payload = jwt.decode(token);
+    if (!payload || !payload.exp) {
+      return res.status(400).send("invalid token");
+    }
+    await redisClient.expireAt(`token:${token}`, payload.exp);
+
+    res.status(200).send("logout successfully");
+  } catch (err) {
+    res.send("Error " + err.message);
   }
 });
 

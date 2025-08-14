@@ -6,7 +6,7 @@ const verifyUser = require("../middleware/userAuthenticate");
 
 userRouter.get("/", verifyUser, async (req, res) => {
   try {
-    res.status(200).send(req.user);
+    res.status(200).send(req.result);
   } catch (err) {
     res.status(403).send("Error " + err);
   }
