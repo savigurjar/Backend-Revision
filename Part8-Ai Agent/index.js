@@ -4,7 +4,7 @@ const readlineSync = require("readline-sync");
 // Alternatively:
 const { GoogleAuth } = require("google-auth-library");
 
-const ai = new GoogleGenAI({ apikey: process.env.GOOGLE_API_KEY });
+const ai = new GoogleGenAI({ apikey: process.env.API_KEY });
 const History = [];
 
 async function main() {
@@ -138,22 +138,22 @@ Return the result in JSON only.`;
       role: "model",
       parts: [{ text: response }],
     });
+    response = response.trim();
     response = response.replace(/^```json\s*|```$/g, "").trim();
     const data = await JSON.parse(response);
-     
 
-     if (data.weather_details_needed == false) {
+    if (data.weather_details_needed == false) {
       console.log(data.weather_report);
       break;
     }
 
     const weatherInformation = await getWeather(data.location);
-    
+
     const weatherIn = JSON.stringify(weatherInformation);
 
     History.push({
       role: "user",
-      parts: [{ text: weatherIn }],
+      parts: [{ text: `this is weather report : ${weatherIn}` }],
     });
   }
 }
