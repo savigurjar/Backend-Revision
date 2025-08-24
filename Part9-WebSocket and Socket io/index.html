@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat App</title>
+  </head>
+  <body>
+    <h1 style="color: rgb(29, 90, 143); margin-top: 30px; margin-left: 40px">
+      CHAT APP
+    </h1>
+
+    <div
+      id="messageDisplay"
+      style="
+        height: 40vh;
+        width: 50vw;
+        background-color: black;
+        margin: 40px 40px;
+        padding: 10px;
+        overflow-y: auto;
+      "
+    ></div>
+
+    <input
+      type="text"
+      placeholder="Enter your Message: "
+      id="inputMsg"
+      style="margin: 30px 40px; height: 10vh; width: 30vw; font-size: 25px"
+    />
+
+    <button
+      onclick="sendMsg()"
+      style="height: 40px; width: 70px; border-radius: 2px"
+    >
+      Send
+    </button>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const messageBox = document.getElementById("messageDisplay");
+      const inputMsg = document.getElementById("inputMsg");
+
+      function sendMsg() {
+        const msg = inputMsg.value.trim();
+        if (!msg) return;
+
+        socket.emit("message", msg);
+        inputMsg.value = "";
+
+        const ele = document.createElement("div");
+        ele.textContent = msg;
+        ele.style.textAlign = "right";
+        ele.style.color = "white";
+        messageBox.appendChild(ele);
+      }
+
+      socket.on("new-message", (data) => {
+        const ele = document.createElement("div");
+        ele.textContent = data;
+        ele.style.textAlign = "left";
+        ele.style.color = "pink";
+        messageBox.appendChild(ele);
+      });
+    </script>
+  </body>
+</html>
