@@ -4,8 +4,10 @@ const validuser = require("../Validator/valid")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
 const User = require("../models/users");
+const RedisClient = require("../config/redis")
 
-const userAuth = require("../middleware/authenticate")
+const userAuth = require("../middleware/authenticate");
+const redisClient = require("../../Part6-Backend Revision/config/redis");
 
 
 authRouter.post("/user", async (req, res) => {
@@ -49,5 +51,38 @@ authRouter.post("/login", async (req, res) => {
         res.status(401).send("error " + err)
     }
 })
+
+authRouter.post("/logout", userAuth, async (req, res) => {
+    try {
+        const { token } = req.cookies;
+        if (!token) throw new Error("Token is missing");
+
+        // Ensure Redis is connected
+        if (!redisClient.isOpen) {
+            await redisClient.connect();
+        }
+
+        // Check if token is already blocked
+        const isBlocked = await redisClient.exists(`token:${token}`);
+        if (isBlocked) throw new Error("Token is already invalidated");
+
+        // Block the token in Redis
+        await redisClient.set(`token:${token}`, "Blocked");
+
+        // Verify token and get payload
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Set Redis key to expire when the JWT naturally expires
+        await redisClient.expireAt(`token:${token}`, payload.exp);
+
+        // Clear cookie
+        res.clearCookie("token", { httpOnly: true, secure: true });
+        res.send("Logout Successfully");
+
+    } catch (err) {
+        res.status(401).send("error: " + err.message);
+    }
+});
+
 
 module.exports = authRouter;
