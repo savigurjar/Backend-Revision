@@ -17,9 +17,10 @@ const IntializeConnection = async () => {
         await main();
 
         // Connect to Redis
-        if (!redisClient.isOpen) {
-    await redisClient.connect();
-}
+
+        await redisClient.connect();
+   
+        console.log("connected to db and redis")
 
 
         // Start the server

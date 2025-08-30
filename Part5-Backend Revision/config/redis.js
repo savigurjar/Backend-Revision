@@ -9,9 +9,4 @@ const redisClient = redis.createClient({
   },
 });
 
-const connectRedis = async () => {
-  await redisClient.connect();
-  console.log("Connected to Redis");
-};
-connectRedis();
 module.exports = redisClient;
