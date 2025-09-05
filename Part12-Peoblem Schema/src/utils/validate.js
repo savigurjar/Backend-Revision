@@ -9,7 +9,9 @@ async function validateUser (data){
 
     const {firstname,emailId,password} = data;
 
-    if(!(firstname.length>=3 && firstname<=20)) throw new Error("name have atleast 3 and more characters");
+   if (!(firstname.length >= 3 && firstname.length <= 20))
+    throw new Error("Name must be between 3 and 20 characters");
+
 
     if(!validator.isEmail(emailId)) throw new Error("Enter right email");
 

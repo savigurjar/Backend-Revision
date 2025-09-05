@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User")
 const redisClient = require("../database/redis")
 
-const userMiddleware = async (req, res, next) => {
+const adminMiddleware = async (req, res, next) => {
     try {
 
         const { token } = req.cookies;
@@ -28,4 +28,4 @@ const userMiddleware = async (req, res, next) => {
  return res.status(401).send("Unauthorized: " + err.message);
     }
 }
-module.exports = userMiddleware 
+module.exports = adminMiddleware 
