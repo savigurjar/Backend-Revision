@@ -133,4 +133,50 @@ const updateProblem = async (req, res) => {
         res.status(500).send("Error ", +err)
     }
 }
-module.exports = { createProblem };
+
+const delelteProblem = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) return res.status(400).send("Id is missing");
+
+        const dsaProblem = await Problem.findById(id);
+        if (!dsaProblem) return res.status(400).send("Problem Id is not found");
+
+        const delProblem = await Problem.findByIdAndDelete(id);
+        if (!delProblem) return res.status(400).send("Problem is not present in server")
+
+        res.status(200).send("Problem deleted successfully")
+
+
+    } catch (err) {
+        res.status(500).send("Error " + err)
+    }
+}
+
+const getProblemById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) return res.status(400).send("Id is missing");
+
+        const dsaProblem = await Problem.findById(id).select(_id, language, description, tags, visibleTestCases, constraints, startCode);
+        if (!dsaProblem) return res.status(400).send("Problem Id is not present");
+
+        res.status(200).send(dsaProblem)
+
+    } catch (err) {
+        res.status(500).send("Error " + err)
+    }
+}
+const getAllProblem = async (req, res) => {
+    try {
+        const dsaProblem = await Problem.find({});
+
+        if (dsaProblem.length == 0) return res.status(400).send("Problems are missing");
+
+        res.status(200).send(dsaProblem);
+
+    } catch (err) {
+        res.status(500).send("Error " + err)
+    }
+}
+module.exports = { createProblem, updateProblem, delelteProblem, getProblemById ,getAllProblem};

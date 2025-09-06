@@ -16,7 +16,7 @@ const register = async (req, res) => {
         await validUser(req.body);
 
         req.body.password = await bcrypt.hash(req.body.password, 10);
-        req.body.role = "user";
+        // req.body.role = "user";
 
         const people = await User.create(req.body);
 
@@ -80,30 +80,30 @@ const logout = async (req, res) => {
     }
 };
 
-const adminRegister = async (req, res) => {
-    try {
-        // 👇 Check if the requester is an admin
-        if (!req.result || req.result.role !== "admin") {
-            throw new Error("Only admins can create another admin");
-        }
+// const adminRegister = async (req, res) => {
+//     try {
+//         // 👇 Check if the requester is an admin
+//         if (!req.result || req.result.role !== "admin") {
+//             throw new Error("Only admins can create another admin");
+//         }
 
-        await validUser(req.body);
-        req.body.password = await bcrypt.hash(req.body.password, 10);
-        req.body.role = "admin";
+//         await validUser(req.body);
+//         req.body.password = await bcrypt.hash(req.body.password, 10);
+//         req.body.role = "admin";
 
-        const people = await User.create(req.body);
+//         const people = await User.create(req.body);
 
-        const token = jwt.sign(
-            { _id: people._id, role: people.role, emailId: people.emailId },
-            process.env.JWT_KEY,
-            { expiresIn: "1d" }
-        );
+//         const token = jwt.sign(
+//             { _id: people._id, role: people.role, emailId: people.emailId },
+//             process.env.JWT_KEY,
+//             { expiresIn: "1d" }
+//         );
 
-        res.cookie("token", token, cookieOptions);
-        res.status(201).send("Admin created successfully");
-    } catch (err) {
-        res.status(401).json({ error: err.message });
-    }
-};
+//         res.cookie("token", token, cookieOptions);
+//         res.status(201).send("Admin created successfully");
+//     } catch (err) {
+//         res.status(401).json({ error: err.message });
+//     }
+// };
 
-module.exports = { register, login, getProfile, logout, adminRegister };
+module.exports = { register, login, getProfile, logout,  };
