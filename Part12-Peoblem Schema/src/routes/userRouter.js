@@ -1,7 +1,7 @@
 const express = require("express");
 const authRouter = express.Router();
 const userMiddleware = require("../middleware/userMiddle");
-const { register, getProfile, login, logout, } = require("../Controllers/userAuthenti");
+const { register, getProfile, login, logout} = require("../Controllers/userAuthenti");
 const adminMiddleware = require("../middleware/adminMiddleware");
 
 // Public routes

@@ -39,14 +39,9 @@ const submitBatch = async (submissions) => {
     return await fetchData();
 }
 
-const waiting = async (timer) => {
-    setTimeout(() => {
-        return 1
-    }, timer)
-}
+const waiting = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const submitToken = async (resultToken) => {
-
-
     const options = {
         method: 'GET',
         url: 'https://judge0-ce.p.rapidapi.com/submissions/batch',
@@ -62,21 +57,16 @@ const submitToken = async (resultToken) => {
     };
 
     async function fetchData() {
-        try {
-            const response = await axios.request(options);
-            return response.data;
-        } catch (error) {
-            console.error(error);
-        }
+        const response = await axios.request(options);
+        return response.data;
     }
 
     while (true) {
         const result = await fetchData();
-
-        const isObtainResult = result.submissions.every((r) => r.status_id > 2);
-        if (isObtainResult) return result.submissions;
-
-        await waiting(1000)
+        const done = result.submissions.every(r => r.status_id > 2);
+        if (done) return result.submissions;
+        await waiting(1000); // wait 1s before retry
     }
-}
+};
+
 module.exports = { getlanguage, submitBatch, submitToken }

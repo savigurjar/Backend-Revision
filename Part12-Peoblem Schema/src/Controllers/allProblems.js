@@ -1,5 +1,5 @@
 const Problem = require("../models/Problem")
-const { getlanguageById, submitBatch, submitToken } = require("../utils/problemUtility")
+const { getlanguage, submitBatch, submitToken } = require("../utils/problemUtility")
 
 const createProblem = async (req, res) => {
     const { title, tags, difficulty, constraints, examples, startCode, referenceSolution, visibleTestCases, hiddenTestCases, createdBy } = req.body;
@@ -8,7 +8,7 @@ const createProblem = async (req, res) => {
     try {
 
         for (const { language, completeCode } of referenceSolution) {
-            const languageId = getlanguageById(language)
+            const languageId = await getlanguage(language)
 
 
             // source_code:
@@ -50,12 +50,13 @@ const createProblem = async (req, res) => {
 
         }
 
-        const userProblem = {
+        const newProblem = new Problem({
+      ...req.body,
+      createdBy: req.result._id
+    });
 
-            ...req.body,
-            createdBy: req.result._id
-
-        }
+    await newProblem.save();
+         
         res.status(201).send("Problem Saved Successfully");
 
     } catch (err) {
@@ -64,6 +65,7 @@ const createProblem = async (req, res) => {
 }
 
 const updateProblem = async (req, res) => {
+     const { title, tags, difficulty, constraints, examples, startCode, referenceSolution, visibleTestCases, hiddenTestCases, createdBy } = req.body;
     const { id } = req.params;
 
     try {
@@ -75,7 +77,7 @@ const updateProblem = async (req, res) => {
         if (!dsaProblem) return res.status(400).send("Problem is not present in server");
 
         for (const { language, completeCode } of referenceSolution) {
-            const languageId = getlanguageById(language)
+            const languageId = await getlanguage(language)
 
 
             // source_code:
@@ -154,29 +156,35 @@ const delelteProblem = async (req, res) => {
 }
 
 const getProblemById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        if (!id) return res.status(400).send("Id is missing");
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).send("Id is missing");
 
-        const dsaProblem = await Problem.findById(id).select(_id, language, description, tags, visibleTestCases, constraints, startCode);
-        if (!dsaProblem) return res.status(400).send("Problem Id is not present");
+    const dsaProblem = await Problem.findById(id).select(
+      "id title description tags  difficulty constraints startCode"
+    );
 
-        res.status(200).send(dsaProblem)
+    if (!dsaProblem) return res.status(404).send("Problem not found");
 
-    } catch (err) {
-        res.status(500).send("Error " + err)
-    }
-}
+    res.status(200).send(dsaProblem);
+  } catch (err) {
+    res.status(500).send("Error " + err);
+  }
+};
+
 const getAllProblem = async (req, res) => {
-    try {
-        const dsaProblem = await Problem.find({});
+  try {
+    const dsaProblems = await Problem.find({}).select(
+      "id title description tags difficulty "
+    );;
 
-        if (dsaProblem.length == 0) return res.status(400).send("Problems are missing");
+    if (!dsaProblems || dsaProblems.length === 0)
+      return res.status(404).send("No problems found");
 
-        res.status(200).send(dsaProblem);
+    res.status(200).send(dsaProblems);
+  } catch (err) {
+    res.status(500).send("Error " + err);
+  }
+};
 
-    } catch (err) {
-        res.status(500).send("Error " + err)
-    }
-}
 module.exports = { createProblem, updateProblem, delelteProblem, getProblemById ,getAllProblem};
