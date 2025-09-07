@@ -6,12 +6,14 @@ require("dotenv").config()
 const authRouter = require("./routes/userRouter")
 const cookieParser = require("cookie-parser")
 const problemRouter = require("./routes/problemRouter")
+const submitRouter = require("./routes/submitRouter")
 
 app.use(express.json())
 app.use(cookieParser())
 
 app.use("/auth",authRouter);
 app.use("/problem",problemRouter)
+app.use("/submission",submitRouter)
 
 
 

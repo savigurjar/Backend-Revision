@@ -1,5 +1,5 @@
 const axios = require('axios');
-const getlanguage = async (lang) => {
+const getlanguage =  (lang) => {
     const language = {
         "c++": 54,
         "java": 62,

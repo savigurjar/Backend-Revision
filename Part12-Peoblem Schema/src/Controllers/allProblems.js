@@ -8,7 +8,7 @@ const createProblem = async (req, res) => {
     try {
 
         for (const { language, completeCode } of referenceSolution) {
-            const languageId = await getlanguage(language)
+            const languageId =  getlanguage(language)
 
 
             // source_code:
@@ -77,7 +77,7 @@ const updateProblem = async (req, res) => {
         if (!dsaProblem) return res.status(400).send("Problem is not present in server");
 
         for (const { language, completeCode } of referenceSolution) {
-            const languageId = await getlanguage(language)
+            const languageId = getlanguage(language)
 
 
             // source_code:
